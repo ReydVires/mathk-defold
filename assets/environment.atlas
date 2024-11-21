@@ -1,0 +1,11 @@
+images {
+  image: "/assets/background.png"
+}
+images {
+  image: "/assets/background-main.png"
+  pivot_y: 0.75
+}
+images {
+  image: "/assets/scale-main.png"
+}
+extrude_borders: 2

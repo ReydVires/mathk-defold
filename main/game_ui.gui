@@ -1,0 +1,246 @@
+script: "/main/game.gui_script"
+fonts {
+  name: "text_regular"
+  font: "/assets/text_32.font"
+}
+fonts {
+  name: "text_bold"
+  font: "/druid/fonts/text_bold.font"
+}
+textures {
+  name: "ui"
+  texture: "/assets/ui.atlas"
+}
+nodes {
+  position {
+    x: 180.0
+    y: 564.0
+  }
+  type: TYPE_BOX
+  texture: "ui/empty"
+  id: "hud_layout"
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_S
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  size {
+    x: 190.0
+    y: 42.0
+  }
+  type: TYPE_BOX
+  texture: "ui/blank_32"
+  id: "q_box"
+  parent: "hud_layout"
+  inherit_alpha: true
+  slice9 {
+    x: 12.0
+    y: 32.0
+    z: 12.0
+    w: 32.0
+  }
+}
+nodes {
+  position {
+    x: -83.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.102
+    y: 0.102
+    z: 0.102
+  }
+  type: TYPE_TEXT
+  text: "[9]. 1 + 2"
+  font: "text_regular"
+  id: "q_text"
+  xanchor: XANCHOR_LEFT
+  pivot: PIVOT_W
+  outline {
+    x: 0.102
+    y: 0.102
+    z: 0.102
+  }
+  shadow {
+    x: 0.2
+    y: 0.2
+    z: 0.2
+  }
+  line_break: true
+  parent: "q_box"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 136.0
+    y: 46.0
+  }
+  size {
+    x: 80.0
+    y: 42.0
+  }
+  type: TYPE_BOX
+  texture: "ui/blank_32"
+  id: "score_box"
+  xanchor: XANCHOR_RIGHT
+  yanchor: YANCHOR_TOP
+  parent: "hud_layout"
+  inherit_alpha: true
+  slice9 {
+    x: 12.0
+    y: 32.0
+    z: 12.0
+    w: 32.0
+  }
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.102
+    y: 0.102
+    z: 0.102
+  }
+  type: TYPE_TEXT
+  text: "999"
+  font: "text_bold"
+  id: "score_text"
+  parent: "score_box"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 51.0
+  }
+  type: TYPE_BOX
+  texture: "ui/empty"
+  id: "level_box"
+  parent: "hud_layout"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: -5.0
+  }
+  scale {
+    x: 0.6
+    y: 0.6
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 1"
+  font: "text_bold"
+  id: "level_text"
+  parent: "level_box"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: -180.0
+    y: 76.0
+  }
+  type: TYPE_BOX
+  texture: "ui/empty"
+  id: "live_layout"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_NW
+  parent: "hud_layout"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 43.0
+    y: -41.0
+  }
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/background_window"
+  id: "live_box"
+  parent: "live_layout"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 12.0
+  }
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "99"
+  font: "text_regular"
+  id: "live_text"
+  parent: "live_box"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 43.5
+    y: 697.5
+  }
+  type: TYPE_BOX
+  texture: "ui/empty"
+  id: "timer_layout"
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_TOP
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  scale {
+    x: 0.5
+    y: 0.5
+  }
+  type: TYPE_BOX
+  texture: "ui/background_window"
+  id: "timer_box"
+  parent: "timer_layout"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -2.0
+    y: 12.0
+  }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "99"
+  font: "text_regular"
+  id: "timer_text"
+  parent: "timer_box"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

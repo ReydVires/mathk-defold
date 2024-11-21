@@ -1,0 +1,172 @@
+{
+  :bundle {
+    :android {
+      :architecture {
+        :arm64-android false
+        :armv7-android true
+      }
+      :format "apk"
+      :install false
+      :key-pass ""
+      :keystore ""
+      :keystore-pass ""
+      :launch false
+    }
+    :build-report false
+    :contentless false
+    :debug-symbols false
+    :html5 {
+      :architecture {
+        :js-web false
+        :wasm-web true
+      }
+    }
+    :liveupdate false
+    :output-directory "E:\\Game Development\\My Project\\Defold\\Defold Project\\Matkh\\build"
+    :texture-compression "enabled"
+    :variant "release"
+  }
+  :code {
+    :find {
+      :term "SPLASH"
+    }
+  }
+  :run {
+    :simulated-resolution {
+      :height 824
+      :width 412
+    }
+  }
+  :workflow {
+    :recent-files [
+      [
+        "/renderer/default.render"
+        :cljfx-form-view
+      ]
+      [
+        "/assets/math.tilesource"
+        :scene
+      ]
+      [
+        "/main/main.collection"
+        :scene
+      ]
+      [
+        "/README.md"
+        :html
+      ]
+      [
+        "/builtins/input/all.input_binding"
+        :cljfx-form-view
+      ]
+      [
+        "/builtins/graphics/particle_blob.tilesource"
+        :scene
+      ]
+      [
+        "/main/label.go"
+        :scene
+      ]
+      [
+        "/main/label.gui"
+        :scene
+      ]
+      [
+        "/main/collect.collection"
+        :scene
+      ]
+      [
+        "/main/frame.gui"
+        :scene
+      ]
+      [
+        "/main/collectible.script"
+        :code
+      ]
+      [
+        "/main/player.script"
+        :code
+      ]
+      [
+        "/main/collectible.go"
+        :scene
+      ]
+      [
+        "/assets/default.font"
+        :scene
+      ]
+      [
+        "/druid/fonts/text_regular.font"
+        :scene
+      ]
+      [
+        "/assets/text.font"
+        :scene
+      ]
+      [
+        "/druid/fonts/text_bold.font"
+        :scene
+      ]
+      [
+        "/assets/text_32.font"
+        :scene
+      ]
+      [
+        "/input/default.gamepads"
+        :text
+      ]
+      [
+        "/input/default.gamepads"
+        :cljfx-form-view
+      ]
+      [
+        "/main/answer_collectible.collection"
+        :scene
+      ]
+      [
+        "/custom_render/default.render"
+        :cljfx-form-view
+      ]
+      [
+        "/input/game.input_binding"
+        :cljfx-form-view
+      ]
+      [
+        "/assets/environment.atlas"
+        :scene
+      ]
+      [
+        "/assets/ui.atlas"
+        :scene
+      ]
+      [
+        "/main/game.collection"
+        :scene
+      ]
+      [
+        "/main/game_ui.gui"
+        :scene
+      ]
+      [
+        "/main/gui/modal.gui"
+        :scene
+      ]
+      [
+        "/game.project"
+        :cljfx-form-view
+      ]
+      [
+        "/game.project"
+        :text
+      ]
+      [
+        "/main/engine_template.html"
+        :text
+      ]
+      [
+        "/builtins/manifests/web/engine_template.html"
+        :text
+      ]
+    ]
+  }
+}

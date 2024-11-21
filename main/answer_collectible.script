@@ -1,0 +1,112 @@
+local global_data = require("main.data")
+
+--- @class main.collectible
+--- @field is_debug boolean
+--- @field is_correct boolean
+--- @field _id number
+
+go.property("is_debug", false)
+
+local speed = 80
+
+--- @param number integer
+--- @return integer|nil, integer|string
+local function separateTensAndUnits(number)
+	-- Ensure the number is in the range of -99 to 99
+	if number < -99 or number > 99 then
+		return nil, "Out of range number (-99 to 99)"
+	end
+
+	-- Get the absolute value to separate tens and units easily
+	local absNumber = math.abs(number)
+	local tens = math.floor(absNumber / 10)
+	local units = absNumber % 10
+
+	-- pprint("before: " .. tens == 0)
+	-- pprint("after: " .. tens == 0 and nil or tens)
+
+	-- Restore the sign for tens if the number is negative
+	if number < 0 then
+		tens = -tens
+	end
+
+	return tens, units
+end
+
+--- @param self main.collectible
+function init(self)
+	self.is_correct = false
+end
+
+--- @param self main.collectible
+--- @param dt number
+function update(self, dt)
+	if (global_data.game_state ~= global_data.STATE_PLAYING) then return end
+
+	local pos = go.get_position()
+	if (pos.y <= 110) then
+		speed = math.random(80, 120)
+
+		local resetY = global_data.H_SCREEN * 1.1
+		pos.y = resetY
+		go.set_position(pos)
+		return
+	end
+
+	pos.y = pos.y - (speed * dt);
+	go.set_position(pos)
+end
+
+--- @param self main.collectible
+--- @param message_id hash
+--- @param message table
+--- @param sender url
+function on_message(self, message_id, message, sender)
+	if (message_id == hash("trigger_response")) then
+		--- @cast message trigger_response_msg
+		if (message.other_group == hash("player") and message.enter) then
+			if (self.is_correct) then
+				msg.post("/root#game", "add_score", { value = 1, is_correct = true })
+			else
+				msg.post("/root#game", "damaged", { value = -1, id = self._id })
+			end
+		end
+	end
+
+	if (message_id == hash("gameover_state")) then
+		msg.post("#collisionobject", "disable")
+	end
+
+	if (message_id == hash("playing_state")) then
+		msg.post("#collisionobject", "enable")
+	end
+
+	if (message_id == hash("set_answer")) then
+		self._id = message.id
+		self.is_correct = message.is_correct
+
+		-- pprint("--> separate fn")
+		local tens, units = separateTensAndUnits(message.value)
+		-- pprint(tens)
+		-- pprint(units)
+		-- pprint("<-- end")
+
+		msg.post("collectible_unit#sprite", "play_animation", { id = hash(string.format((units))) })
+		if (tens ~= 0 and tens ~= nil) then
+			local url = msg.url("collectible_unit")
+			local prop = hash("position.x")
+			go.set(url, prop, 20.0)
+			msg.post("collectible_tens#sprite", "enable")
+
+			msg.post("collectible_tens#sprite", "play_animation", { id = hash(string.format(tens)) })
+		elseif (type(units) ~= "string") then
+			local url = msg.url("collectible_unit")
+			local prop = hash("position.x")
+			go.set(url, prop, 0.0)
+
+			msg.post("collectible_tens#sprite", "disable")
+		else
+			pprint("[Error]: " .. units .. "; Actual: " .. tostring(message.value))
+		end
+	end
+end

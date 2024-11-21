@@ -1,0 +1,144 @@
+script: "/main/gui/modal.gui_script"
+fonts {
+  name: "text_bold"
+  font: "/druid/fonts/text_bold.font"
+}
+fonts {
+  name: "text_regular"
+  font: "/druid/fonts/text_regular.font"
+}
+fonts {
+  name: "text_32"
+  font: "/assets/text_32.font"
+}
+textures {
+  name: "druid"
+  texture: "/druid/druid.atlas"
+}
+textures {
+  name: "ui"
+  texture: "/assets/ui.atlas"
+}
+nodes {
+  position {
+    x: 180.0
+    y: -215.0
+  }
+  type: TYPE_BOX
+  texture: "druid/empty"
+  id: "modal_layout"
+  yanchor: YANCHOR_TOP
+  pivot: PIVOT_S
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 64.0
+  }
+  size {
+    x: 256.0
+    y: 256.0
+  }
+  type: TYPE_BOX
+  texture: "ui/panel-layout"
+  id: "title_box"
+  parent: "modal_layout"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 86.0
+  }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
+  size {
+    x: 280.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Menuju Level 9"
+  font: "text_bold"
+  id: "title_text"
+  pivot: PIVOT_N
+  line_break: true
+  parent: "title_box"
+  inherit_alpha: true
+}
+nodes {
+  type: TYPE_BOX
+  texture: "druid/empty"
+  id: "confirm_box"
+  pivot: PIVOT_N
+  parent: "modal_layout"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  size {
+    x: 128.0
+    y: 32.0
+  }
+  color {
+    x: 0.702
+    y: 0.621
+    z: 0.502
+  }
+  type: TYPE_BOX
+  texture: "druid/ui_circle_32"
+  id: "confirm_shadow_box"
+  parent: "confirm_box"
+  inherit_alpha: true
+  slice9 {
+    x: 12.0
+    y: 8.0
+    z: 12.0
+    w: 8.0
+  }
+  alpha: 0.32
+}
+nodes {
+  position {
+    y: 2.0
+  }
+  size {
+    x: 128.0
+    y: 32.0
+  }
+  color {
+    x: 0.502
+    y: 0.702
+    z: 0.502
+  }
+  type: TYPE_BOX
+  texture: "druid/ui_circle_32"
+  id: "confirm_btn"
+  parent: "confirm_box"
+  inherit_alpha: true
+  slice9 {
+    x: 16.0
+    y: 8.0
+    z: 16.0
+    w: 8.0
+  }
+}
+nodes {
+  scale {
+    x: 0.75
+    y: 0.75
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Okay"
+  font: "text_32"
+  id: "confirm_text"
+  parent: "confirm_btn"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

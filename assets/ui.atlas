@@ -1,0 +1,46 @@
+images {
+  image: "/assets/panel-layout.png"
+}
+images {
+  image: "/assets/number/1.png"
+}
+images {
+  image: "/assets/number/2.png"
+}
+images {
+  image: "/assets/number/3.png"
+}
+images {
+  image: "/assets/number/4.png"
+}
+images {
+  image: "/assets/number/5.png"
+}
+images {
+  image: "/assets/number/6.png"
+}
+images {
+  image: "/assets/number/7.png"
+}
+images {
+  image: "/assets/number/8.png"
+}
+images {
+  image: "/assets/number/9.png"
+}
+images {
+  image: "/assets/number/0.png"
+}
+images {
+  image: "/assets/window_general/background_window.png"
+}
+images {
+  image: "/assets/pixel.png"
+}
+images {
+  image: "/assets/empty.png"
+}
+images {
+  image: "/assets/blank_32.png"
+}
+extrude_borders: 2

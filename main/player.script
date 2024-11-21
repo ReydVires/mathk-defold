@@ -1,0 +1,87 @@
+--- @class main.player
+--- @field move_state string
+
+local speed = 250
+local offset_min_player = 35
+local W_SCREEN = sys.get_config_int("display.width")
+local is_selected = false
+
+local function m_clamp(x, min, max)
+	if x >= min then
+		if x <= max then return x end
+		return max
+	end
+	return min
+end
+
+--- @param self main.player
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.move_state = "idle"
+
+	local position = go.get_position()
+	position.x = W_SCREEN / 2
+	position.y = 45
+	go.set_position(position)
+end
+
+--- @param self main.player
+--- @param action_id hash
+--- @param action on_input.action
+function on_input(self, action_id, action)
+	if action_id == hash("left") or action_id == hash('a') then
+		self.move_state = "left"
+		if (action.released) then
+			self.move_state = "idle"
+		end
+	elseif action_id == hash("right") or action_id == hash('d') then
+		self.move_state = "right"
+		if (action.released) then
+			self.move_state = "idle"
+		end
+	end
+
+	-- TODO Mouse input if resize
+	if (action_id == hash("left_click") or action_id == hash("touch")) and action.pressed then
+		-- pprint(action)
+		local mouse_pos_y = math.floor(action.y ~= nil and action.y or 0)
+		local mouse_pos_x = math.floor(action.x ~= nil and action.x or 0)
+
+		local pos = go.get_position()
+		local pos_x_left = pos.x - 50
+		local pos_y_top = pos.y + 100
+		local pos_x_right = pos.x + 50
+		local pos_y_bot = pos.y - 100
+
+		if (mouse_pos_x >= pos_x_left and mouse_pos_x <= pos_x_right) and
+				(mouse_pos_y <= pos_y_top and mouse_pos_y >= pos_y_bot) then
+			is_selected = true
+		end
+	elseif ((action_id == hash("left_click") or action_id == hash("touch")) and action.released) or
+			(action.x <= 0 or action.x >= W_SCREEN) then
+		is_selected = false
+	else
+		if is_selected then
+			local pos = go.get_position()
+			local mouse_pos_x = math.floor(action.x ~= nil and action.x or 0)
+			pos.x = mouse_pos_x
+			go.set_position(pos)
+		end
+	end
+end
+
+--- @param self main.player
+--- @param dt number
+function update(self, dt)
+	local pos = go.get_position()
+
+	if self.move_state == "left" then
+		pos.x = pos.x - speed * dt
+	elseif self.move_state == "right" then
+		pos.x = pos.x + speed * dt
+	end
+
+	local offset_max_player = W_SCREEN - offset_min_player;
+	pos.x = m_clamp(pos.x, offset_min_player, offset_max_player)
+	go.set_position(pos)
+end

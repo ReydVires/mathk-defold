@@ -1,0 +1,87 @@
+local global_data = require("main.data")
+
+--- @class main.gui
+--- @field timer number
+--- @field counter number
+
+local BASE_COUNTER = 100
+local BASE_LIVE = global_data.live
+
+--- @param self main.gui
+function init(self)
+	self.timer = 0
+	self.counter = BASE_COUNTER
+
+	local score_text_node = gui.get_node("score_text")
+	gui.set_text(score_text_node, 0)
+
+	local live_text_node = gui.get_node("live_text")
+	gui.set_text(live_text_node, BASE_LIVE)
+end
+
+--- @param self main.gui
+--- @param dt number
+function update(self, dt)
+	if (global_data.game_state ~= global_data.STATE_PLAYING) then return end
+
+	if (self.counter >= 0) then
+		self.counter = self.counter - 100 * dt
+	elseif (self.timer > 0) then -- TODO Remove timer
+		self.timer = self.timer - 1
+		msg.post("#", "set_timer_text", { time = self.timer })
+		self.counter = BASE_COUNTER
+	end
+
+	if (self.timer <= 0) then
+		msg.post("#", "gameover_state")
+		msg.post("/root#game", "gameover_state")
+	end
+end
+
+--- @param self main.gui
+--- @param message_id hash
+--- @param message table
+--- @param sender url
+function on_message(self, message_id, message, sender)
+	if (message_id == hash("init_timer")) then
+		self.timer = message.start_time
+		msg.post("#", "set_timer_text", { time = message.start_time })
+	end
+
+	if (message_id == hash("init_question")) then
+		local question = message.question
+		local q_text = gui.get_node("q_text")
+		gui.set_text(
+			q_text,
+			"[" .. message.num .. "]. " .. question.x .. " " .. question.operator .. " " .. question.y
+		)
+	end
+
+	if (message_id == hash("set_timer_text")) then
+		local timer_text = gui.get_node("timer_text")
+		gui.set_text(timer_text, message.time)
+	end
+
+	if (message_id == hash("gameover_state")) then
+		local node = gui.get_node("timer_layout")
+		gui.set_enabled(node, false)
+	end
+
+	if (message_id == hash("set_score")) then
+		-- pprint("set_score UI: " .. message.value)
+		local node = gui.get_node("score_text")
+		gui.set_text(node, message.value)
+	end
+
+	if (message_id == hash("set_live")) then
+		-- pprint("set_live UI: " .. message.value)
+		local node = gui.get_node("live_text")
+		gui.set_text(node, message.value)
+	end
+
+	if (message_id == hash("set_level")) then
+		-- pprint("set_level UI: " .. message.value)
+		local node = gui.get_node("level_text")
+		gui.set_text(node, "LEVEL " .. tostring(message.value))
+	end
+end

@@ -1,0 +1,29 @@
+[bootstrap]
+main_collection = /main/game.collectionc
+render = /custom_render/default.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 360
+height = 640
+
+[android]
+input_method = HiddenInputField
+
+[project]
+title = Matkh
+dependencies#0 = https://github.com/Insality/druid/archive/master.zip
+
+[input]
+gamepads = /input/default.gamepadsc
+
+[html5]
+htmlfile = /main/engine_template.html
+show_made_with_defold = 0
+splash_image = /assets/char.png
+cssfile = /main/light_theme.css
+show_fullscreen_button = 0
+scale_mode = fit
+

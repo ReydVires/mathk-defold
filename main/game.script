@@ -1,0 +1,343 @@
+local global_data = require("main.data")
+
+--- @class main.game
+--- @field start_time number
+--- @field level number
+--- @field bg_node vector3
+
+go.property("start_time", 9999)
+go.property("level", 1)
+
+local BG_URL = "/background_go#sprite";
+local SCALE_URL = "/scale_go#sprite";
+
+local W_SCREEN = sys.get_config_int("display.width")
+local H_SCREEN = sys.get_config_int("display.height")
+
+local answer_gameobject_list = {}
+local number_question = 1
+
+--- @param self main.game
+--- @param x number
+--- @param y number
+--- @param operator number
+--- @return table
+local function operate_data(self, x, y, operator)
+  if (operator == 2) then
+    return {
+      res = x - y,
+      op = "-"
+    }
+    -- elseif (operator == 3) then
+    -- return {
+    --   res = x * y,
+    --   op = "x"
+    -- }
+    -- elseif (operator == 4) then
+    --   return {
+    --     res = x / y,
+    --     op = "÷"
+    --   }
+  else
+    return {
+      res = x + y,
+      op = "+"
+    }
+  end
+end
+
+local function modal_show(self)
+  pprint("Show Modal!")
+  msg.post("#", "gameover_state")
+  msg.post("/frame_go#modal", "show_modal", { value = true, level = self.level })
+end
+
+local function modal_hide(self)
+  msg.post("/frame_go#modal", "show_modal", { value = false })
+end
+
+--- @param self main.game
+--- @return table
+local function generate_question(self)
+  local operands_a = math.random(0, 9)
+  local operands_b = math.random(0, 9)
+  local operator = self.level
+  local info = operate_data(self, operands_a, operands_b, operator)
+
+  return {
+    x = operands_a,
+    y = operands_b,
+    operator = info.op,
+    result = info.res
+  }
+end
+
+--- @param self main.game
+local function shuffle(self, array)  -- Fisher Yates method
+  local shuffled = { unpack(array) } -- Create a copy of the original array
+  local n = #shuffled                -- Get the length of the array
+
+  for i = n, 2, -1 do
+    local j = math.random(1, i)                         -- Pick a random index from 1 to i
+    shuffled[i], shuffled[j] = shuffled[j], shuffled[i] -- Swap elements at index i and j
+  end
+
+  return shuffled
+end
+
+--- @param self main.game
+--- @param url string
+--- @param is_loaded boolean
+local function load_complete(self, url, is_loaded)
+  local answer_location = {
+    [1] = vmath.vector3(W_SCREEN * 0.2, H_SCREEN, 0.1),
+    [2] = vmath.vector3(W_SCREEN * 0.5, H_SCREEN, 0.1),
+    [3] = vmath.vector3(W_SCREEN * 0.8, H_SCREEN, 0.1)
+  }
+  local shuffled_location = shuffle(self, answer_location)
+
+  local generated_question = generate_question(self)
+
+  answer_gameobject_list[1] = collectionfactory.create(
+    url,
+    shuffled_location[1]
+  )
+  msg.post(answer_gameobject_list[1][hash("/root")], "set_answer",
+    {
+      id = 1,
+      value = generated_question.result,
+      is_correct = true
+    })
+
+  answer_gameobject_list[2] = collectionfactory.create(
+    url,
+    shuffled_location[2]
+  )
+  local num_interval = generated_question.result - 2 <= 1 and math.random(2, 9) or generated_question.result - 2
+  msg.post(answer_gameobject_list[2][hash("/root")], "set_answer",
+    {
+      id = 2,
+      value = math.random(0, num_interval),
+      is_correct = false
+    })
+
+  answer_gameobject_list[3] = collectionfactory.create(
+    url,
+    shuffled_location[3]
+  )
+  msg.post(answer_gameobject_list[3][hash("/root")], "set_answer",
+    {
+      id = 3,
+      value = math.random(generated_question.result + 1, generated_question.result + 9),
+      is_correct = false
+    })
+
+  msg.post("/frame_go#game_ui", "init_question", { question = generated_question, num = number_question })
+end
+
+--- @param self main.game
+function init(self)
+  math.randomseed(os.time())
+
+  msg.post(SCALE_URL, "disable")
+
+  self.bg_node = go.get(BG_URL, "size")
+
+  window.set_listener(window_callback)
+
+  collectionfactory.load("/factory_go#collectible_factory", load_complete)
+
+  msg.post("/frame_go#game_ui", "init_timer", { start_time = self.start_time })
+end
+
+--- @param self main.game
+--- @param message_id hash
+--- @param message table
+--- @param sender url
+function on_message(self, message_id, message, sender)
+  if message_id == hash("next_level") then
+    global_data.game_state = global_data.STATE_PLAYING
+    for _, gameobject in pairs(answer_gameobject_list) do
+      local target_url = gameobject[hash("/root")]
+      msg.post(target_url, "playing_state")
+    end
+
+    modal_hide(self)
+  end
+
+  if (message_id == hash("gameover_state")) then
+    global_data.game_state = global_data.STATE_GAMEOVER
+    for _, gameobject in pairs(answer_gameobject_list) do
+      local target_url = gameobject[hash("/root")]
+      msg.post(target_url, "gameover_state")
+    end
+  end
+
+  if (message_id == hash("add_score")) then
+    local curr_score = global_data.score + message.value
+    local score = curr_score <= 0 and 0 or curr_score
+    msg.post("/frame_go#game_ui", "set_score", { value = score })
+    global_data.score = score
+
+    if (message.is_correct) then
+      if (global_data.score == 3) then
+        self.level = 2
+        msg.post("/frame_go#game_ui", "set_level", { value = self.level })
+
+        modal_show(self)
+      end
+
+      -- Need manual enabled all children
+      for _, gameobject in pairs(answer_gameobject_list) do
+        msg.post(gameobject[hash("/root")], "enable")
+        msg.post(gameobject[hash("/collectible_tens")], "enable")
+        msg.post(gameobject[hash("/collectible_unit")], "enable")
+      end
+
+      local shuffled_location = shuffle(self, {
+        [1] = vmath.vector3(W_SCREEN * 0.2, H_SCREEN * 1.05, 0.1),
+        [2] = vmath.vector3(W_SCREEN * 0.5, H_SCREEN * 1.05, 0.1),
+        [3] = vmath.vector3(W_SCREEN * 0.8, H_SCREEN * 1.05, 0.1)
+      })
+
+      local generated_question = generate_question(self)
+      pprint(generated_question)
+
+      go.set_position(shuffled_location[1], answer_gameobject_list[1][hash("/root")])
+      msg.post(answer_gameobject_list[1][hash("/root")], "set_answer",
+        {
+          id = 1,
+          value = generated_question.result,
+          is_correct = true
+        })
+
+      local num_interval = generated_question.result - 2 <= 1 and math.random(2, 9) or generated_question.result - 2
+      go.set_position(shuffled_location[2], answer_gameobject_list[2][hash("/root")])
+      msg.post(answer_gameobject_list[2][hash("/root")], "set_answer",
+        {
+          id = 2,
+          value = math.random(0, num_interval),
+          is_correct = false
+        })
+
+      go.set_position(shuffled_location[3], answer_gameobject_list[3][hash("/root")])
+      msg.post(answer_gameobject_list[3][hash("/root")], "set_answer",
+        {
+          id = 3,
+          value = math.random(generated_question.result + 1, generated_question.result + 9),
+          is_correct = false
+        })
+
+      number_question = number_question + 1
+      msg.post("/frame_go#game_ui", "init_question", { question = generated_question, num = number_question })
+    else
+      local shuffled_location = shuffle(self, {
+        [1] = vmath.vector3(W_SCREEN * 0.2, H_SCREEN * 1.2, 0.1),
+        [2] = vmath.vector3(W_SCREEN * 0.5, H_SCREEN * 1.2, 0.1),
+        [3] = vmath.vector3(W_SCREEN * 0.8, H_SCREEN * 1.2, 0.1)
+      })
+      go.set_position(
+        shuffled_location[1], answer_gameobject_list[1][hash("/root")]
+      )
+      go.set_position(
+        shuffled_location[2], answer_gameobject_list[2][hash("/root")]
+      )
+      go.set_position(
+        shuffled_location[3], answer_gameobject_list[3][hash("/root")]
+      )
+    end
+  end
+
+  if (message_id == hash("damaged")) then
+    local live_left = global_data.live + message.value
+    msg.post("/frame_go#game_ui", "set_live", { value = live_left })
+
+    -- Need manual disabled all children
+    msg.post(answer_gameobject_list[message.id][hash("/root")], "disable")
+    msg.post(answer_gameobject_list[message.id][hash("/collectible_tens")], "disable")
+    msg.post(answer_gameobject_list[message.id][hash("/collectible_unit")], "disable")
+
+    global_data.live = live_left
+    if (live_left <= 0) then
+      msg.post("#", "gameover_state")
+    end
+  end
+end
+
+--- @param self main.game
+function final(self)
+  for _, gameobject in pairs(answer_gameobject_list) do
+    go.delete(gameobject)
+  end
+  answer_gameobject_list = {}
+  collectionfactory.unload("/factory_go#collectible_factory")
+end
+
+function window_callback(self, event, data)
+  if event == window.WINDOW_EVENT_RESIZED then
+    print("--> Window resized: ", data.width, data.height)
+
+    local w, h = data.width, data.height
+
+    -- get widthAspectRatio() {
+    --   return this._gameObject.width / this._gameObject.height;
+    -- }
+    -- local BG_URL = "/background_go#sprite";
+    -- local bg_node = go.get(BG_URL, "size")
+
+    -- local width_aspect_ratio = w / h
+    -- pprint(("width_aspect_ratio: %s"):format(width_aspect_ratio))
+    local height_aspect_ratio = 1920 / 1080
+    pprint(("height_aspect_ratio: %s"):format(height_aspect_ratio))
+    pprint(("bg_node: %s"):format(self.bg_node))
+
+    local aspect_ratio = self.bg_node.x / self.bg_node.y
+    -- pprint(("aspect_ratio: %s"):format(aspect_ratio))
+    local h_aspect_ratio = self.bg_node.y / self.bg_node.x
+    -- pprint(("h_aspect_ratio: %s"):format(h_aspect_ratio))
+
+    -- if (minWidth * this.heightAspectRatio < minHeight) {
+    --   this.setDisplayHeight(minHeight);
+    --   return;
+    -- }
+    -- this.setDisplayWidth(minWidth);
+
+    -- if data.width * height_aspect_ratio < data.height then
+    --   --   this._gameObject.displayHeight = height;
+    --   -- this._gameObject.displayWidth = Math.ceil(
+    --   --   this._gameObject.displayHeight * this.widthAspectRatio
+    --   -- );
+    --   pprint("--")
+    --   -- go.set(BG_URL, "size", vmath.vector3(w, h, bg_node.z))
+    -- else
+    --   -- go.set(BG_URL, "size", vmath.vector3(w, math.ceil(w * height_aspect_ratio), bg_node.z))
+    --   --   this._gameObject.displayWidth = width;
+    --   -- this._gameObject.displayHeight = Math.ceil(
+    --   --   this._gameObject.displayWidth * this.heightAspectRatio
+    --   -- );
+    -- end
+
+    -- if w < W_SCREEN then
+    --   w = W_SCREEN
+    --   h = h * W_SCREEN / data.width
+    -- end
+    -- if h < H_SCREEN then
+    --   h = H_SCREEN
+    --   w = w * H_SCREEN / data.height
+    -- end
+
+    local node_w, node_h = self.bg_node.x, self.bg_node.y
+    go.set(BG_URL, "size", vmath.vector3(node_w, node_h, self.bg_node.z))
+
+    local x = (node_w * height_aspect_ratio)
+    pprint(("bg_w * h_aspect: %d, w: %s"):format(x, w))
+
+    if node_w * height_aspect_ratio < node_h then
+      go.set(BG_URL, "size",
+        vmath.vector3(math.ceil(self.bg_node.x * height_aspect_ratio), self.bg_node.x, self.bg_node.z))
+    else
+      go.set(BG_URL, "size",
+        vmath.vector3(self.bg_node.y, math.ceil(self.bg_node.y * height_aspect_ratio), self.bg_node.z))
+    end
+  end
+end
